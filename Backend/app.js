@@ -1,9 +1,14 @@
 const express = require('express');
-const app = express();
 require('dotenv').config();
-
+const cors = require('cors');
+const connectDB = require('./config/database');
+const userRoutes = require('./routes/userRoutes');
+connectDB();
+const app = express();
 app.use(express.json());
-
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+app.use('/users', userRoutes);
 app.get('/health', (req, res) => {
     res.send(`Server is running on port ${process.env.PORT || 5000}`)
 });
