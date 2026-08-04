@@ -47,5 +47,44 @@ const registerUser = async (req, res, next) => {
     }
 };
 
+const loginUser = async (req, res, next) => {
+    try {   
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(401).json({
+                message: "Email and password are required"
+            });
+        }
+        const existingUser = await user.findOne({ email }).select("+password");
+        if (!existingUser) {
+            return res.status(401).json({
+                message: "Invalid email or password"
+            });
+        }
+        const isPasswordValid = await existingUser.comparePassword(password);
+        if (!isPasswordValid) {
+            return res.status(401).json({   
+                message: "Invalid email or password"
+            });
+        }  
+        const token = existingUser.generateToken();
+        res.status(200).json({
+            message: "Login successful",
+            user: existingUser,
+            token
+        });
+    } catch (error) {
+        console.error("Error logging in user:", error);
+        res.status(500).json({
+            message: "Internal server error",
+            error: error.message
+        });
+    }
+};
 
-;
+
+
+
+
+
+module.exports = {registerUser, loginUser}

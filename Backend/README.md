@@ -78,5 +78,77 @@ Example error response:
 
 ---
 
+## User Login
+
+### Endpoint
+`POST /users/login`
+
+### Overview
+This endpoint authenticates an existing user and returns a JSON Web Token (JWT) that can be used for subsequent authenticated requests.
+
+### Request Format
+Submit a JSON payload with the following structure:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+### Request Parameters
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `email` | string | Yes | Must be the email address for an existing user account. |
+| `password` | string | Yes | Must be at least 6 characters long. |
+
+### Validation Rules
+- The `email` field must be in a valid email format.
+- The `password` field must contain at least 6 characters.
+- Both `email` and `password` must be present.
+
+### Success Response
+- Status: `200 OK`
+
+Example success response:
+
+```json
+{
+  "message": "Login successful",
+  "user": {
+    "_id": "64b8f4b2d8c2a12e8e4d1f2a",
+    "email": "user@example.com",
+    "fullName": {
+      "firstName": "John",
+      "lastName": "Doe"
+    },
+    "createdAt": "2026-08-04T10:00:00.000Z",
+    "updatedAt": "2026-08-04T10:00:00.000Z"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### Error Responses
+- `401 Unauthorized`: Returned when `email` or `password` is missing, or when the credentials do not match an existing user.
+- `500 Internal Server Error`: Returned when an unexpected server-side error occurs during login.
+
+Example missing credentials response:
+
+```json
+{
+  "message": "Email and password are required"
+}
+```
+
+Example invalid credentials response:
+
+```json
+{
+  "message": "Invalid email or password"
+}
+```
+
+---
 
 
