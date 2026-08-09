@@ -1,6 +1,7 @@
+const { validationResult } = require("express-validator");
 const user = require("../models/user");
 const createUser = require("../services/userServices").createUser;
-const { validationResult } = require("express-validator");
+const blackListToken = require("../models/blackListToken");
 
 const registerUser = async (req, res, next) => {
     try {
@@ -68,6 +69,7 @@ const loginUser = async (req, res, next) => {
             });
         }  
         const token = existingUser.generateToken();
+        res.cookie("token", token);
         res.status(200).json({
             message: "Login successful",
             user: existingUser,
@@ -82,9 +84,41 @@ const loginUser = async (req, res, next) => {
     }
 };
 
+const getUserProfile = async (req, res, next) => {
+    try {
+        const { user } = req;
+        res.status(200).json({
+            message: "User profile retrieved successfully",
+            user
+        });
+    } catch (error) {
+        console.error("Error retrieving user profile:", error);
+        res.status(500).json({
+            message: "Internal server error", 
+            error: error.message
+        });
+    }
+};
+
+const logoutUser = (req, res, next) => {
+    try {
+        res.clearCookie("token");  
+        const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+        if (token) {
+            blackListToken.create({ token });
+        }
+        res.status(200).json({
+            message: "Logout successful"
+        });
+    } catch (error) {
+        console.error("Error logging out user:", error);
+        res.status(500).json({ 
+            message: "Internal server error",
+            error: error.message
+        });
+    }
+};
 
 
 
-
-
-module.exports = {registerUser, loginUser}
+module.exports = {registerUser, loginUser, getUserProfile,logoutUser}

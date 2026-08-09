@@ -39,7 +39,7 @@ userSchema.methods.generateToken = function () {
     const token = jwt.sign({
         userId: this._id
     }, process.env.JWT_SECRET || "dev-secret", {
-        expiresIn: "1h"
+        expiresIn: "24h"
     });
     return token;
 };
