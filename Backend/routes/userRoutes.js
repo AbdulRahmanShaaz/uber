@@ -1,7 +1,7 @@
 const express = require("express");
 const { body } = require("express-validator");
 const {registerUser,loginUser,getUserProfile,logoutUser} = require("../controllers/userController");
-const { authMiddleware} = require("../middlewares/authMiddleware");
+const { authMiddleware} = require("../middlewares/userAuthMiddleware");
 const router = express.Router();
 
 router.post("/register", [
