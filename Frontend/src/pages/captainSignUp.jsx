@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useUser } from "../context/UserContext";
 import Uber from "../assets/uber.png";
 
 const CaptainSignUp = () => {
   const navigate = useNavigate();
+  const { loginCaptain } = useUser();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -30,12 +33,9 @@ const CaptainSignUp = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/captains/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const response = await axios.post(
+        "http://localhost:5000/captains/register",
+        {
           fullName: {
             firstName: formData.firstName,
             lastName: formData.lastName,
@@ -52,19 +52,19 @@ const CaptainSignUp = () => {
               longitude: Number(formData.longitude),
             },
           },
-        }),
-      });
+        }
+      );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Captain registration failed");
-      }
-
-      localStorage.setItem("uberCaptainToken", data.token || "");
+      loginCaptain(response.data);
       navigate("/captain-login");
     } catch (err) {
-      setError(err.message || "Something went wrong");
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong");
+      }
     } finally {
       setLoading(false);
     }

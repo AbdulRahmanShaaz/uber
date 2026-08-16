@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useUser } from "../context/UserContext";
 import Uber from "../assets/uber.png";
 import Apple from "../assets/apple.png";
 
 const UserLogin = () => {
   const navigate = useNavigate();
+  const { loginUser } = useUser();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -16,25 +19,24 @@ const UserLogin = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await axios.post(
+        "http://localhost:5000/users/login",
+        { email, password },
+        {
+          withCredentials: true,
+        }
+      );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
-
-      localStorage.setItem("uberUserToken", data.token);
+      loginUser(response.data);
       navigate("/");
     } catch (err) {
-      setError(err.message || "Something went wrong");
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
